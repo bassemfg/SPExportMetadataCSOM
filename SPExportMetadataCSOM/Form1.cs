@@ -46,6 +46,49 @@ namespace SPExportMetadataCSOM
             this.Cursor = Cursors.Default;
         }
 
+        CamlQuery camlQuery = new CamlQuery();
+
+        private List<ListItem> GetAllItems( ClientContext Context, List list, List<ListItem>  ListItems)
+        {
+            //Create a CAML Query object
+            //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
+            //In this script an undefined CamlQuery object is passed, to get all list items 
+            
+            camlQuery.ViewXml =
+    @"< View Scope = 'RecursiveAll'>
+    < Query >
+        <Where>
+        </Where>
+        <OrderBy>
+            <FieldRef Name='ID' />
+        </OrderBy>
+    </ Query >
+</ View >";
+
+            ListItemCollection AllItems = list.GetItems(camlQuery);
+            Context.Load(AllItems);
+            Context.ExecuteQuery();
+            foreach (ListItem item in AllItems)
+            {
+                if (item.FileSystemObjectType == FileSystemObjectType.File)
+                {
+                    if(!ListItems.Contains(item))
+                        ListItems.Add(item);
+                }
+
+
+                if (item.FileSystemObjectType == FileSystemObjectType.Folder)
+                {
+                    camlQuery.FolderServerRelativeUrl = item.FieldValues["FileRef"].ToString();
+                    GetAllItems(Context, list, ListItems);
+                }
+
+
+            }
+
+            return ListItems;
+        }
+
         private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites)
         {
             string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
@@ -106,21 +149,8 @@ namespace SPExportMetadataCSOM
 
                                         if (list.BaseType == BaseType.DocumentLibrary && list.Hidden == false)
                                         {
+                                            List<ListItem> AllItems = GetAllItems(Context,list,new List<ListItem>() );
 
-                                            //Create a CAML Query object
-                                            //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
-                                            //In this script an undefined CamlQuery object is passed, to get all list items 
-                                            CamlQuery camlQuery = new CamlQuery();
-                                            camlQuery.ViewXml = 
-@"< View Scope = ""RecursiveAll"" >
-    < Query >
-    </ Query >
-</ View >";
-
-
-                                            ListItemCollection AllItems = list.GetItems(camlQuery);
-                                            Context.Load(AllItems);
-                                            Context.ExecuteQuery();
                                             if (AllItems.Count > 0)
                                             {
 
@@ -136,28 +166,7 @@ namespace SPExportMetadataCSOM
 ";
                                                     txtOutput.SelectionStart = txtOutput.Text.Length;
                                                     txtOutput.ScrollToCaret();
-                                                    /*
-                                                if (j == 0)
-                                                {
-                                                    sbFields.Append("SourcePath");
-                                                    sbFields.Append(',');
-                                                    sbFields.Append("UniqueId");
-                                                    sbFields.Append(',');
-                                                    sbFields.Append("SiteURL");
-                                                    sbFields.Append(',');
-
-                                                }
-
-                                                sbVals.Append(item["URL Path"].ToString().Replace(',', ' '));
-                                                sbVals.Append(',');
-
-                                                sbVals.Append(item["UniqueId"].ToString());
-                                                sbVals.Append(',');
-
-
-                                                sbVals.Append(sWeb.Url);
-                                                sbVals.Append(',');
-                                                */
+                                                 
                                                     for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
                                                     {
                                                         try
