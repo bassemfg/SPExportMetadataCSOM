@@ -43,13 +43,16 @@
             this.txtUID.Name = "txtUID";
             this.txtUID.Size = new System.Drawing.Size(174, 20);
             this.txtUID.TabIndex = 0;
+            this.txtUID.Text = "boxmigration@originmaterials.com";
             // 
             // txtPwd
             // 
             this.txtPwd.Location = new System.Drawing.Point(111, 70);
             this.txtPwd.Name = "txtPwd";
+            this.txtPwd.PasswordChar = '*';
             this.txtPwd.Size = new System.Drawing.Size(174, 20);
             this.txtPwd.TabIndex = 1;
+            this.txtPwd.Text = "BoxShuttle718";
             // 
             // btnRun
             // 
@@ -84,9 +87,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(24, 123);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(84, 13);
+            this.label3.Size = new System.Drawing.Size(50, 13);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Site collection(s)";
+            this.label3.Text = "Site URL";
             // 
             // txtSiteURL
             // 
@@ -94,6 +97,7 @@
             this.txtSiteURL.Name = "txtSiteURL";
             this.txtSiteURL.Size = new System.Drawing.Size(174, 20);
             this.txtSiteURL.TabIndex = 6;
+            this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/sites/accounting";
             // 
             // Form1
             // 

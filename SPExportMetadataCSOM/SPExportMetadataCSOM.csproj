@@ -32,11 +32,110 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.AnalysisServices.AdomdClient">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.AnalysisServices.AdomdClient.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.BusinessData">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.BusinessData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Extensions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=69c3241e6f0468ca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.IdentityModel.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.mshtml.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.DocumentManagement">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.DocumentManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Excel.Server.Udf">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Excel.Server.Udf.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Excel.Server.WebServices">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Excel.Server.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Policy">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Policy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.SecureStoreService.Server.Security">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.SecureStoreService.Server.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Server">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Server.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Server.Search">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Server.Search.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Server.Search.Applications">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Server.Search.Applications.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Server.Search.Connector">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Server.Search.Connector.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Server.UserProfiles">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Office.Server.UserProfiles.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.SharePoint.Client">
-      <HintPath>..\..\box-windows-sdk-v2\dlls\Microsoft.SharePoint.Client.dll</HintPath>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SharePoint.Client.Runtime">
-      <HintPath>..\..\box-windows-sdk-v2\dlls\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Search">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Client.Search.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.ServerRuntime">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Client.ServerRuntime.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Taxonomy">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Client.Taxonomy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.UserProfiles">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Client.UserProfiles.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Portal">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Portal.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Publishing">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Publishing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Search">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Search.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Search.Extended.Administration">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Search.Extended.Administration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Search.Extended.Administration.Common">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Search.Extended.Administration.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Search.Extended.Administration.ResourceStorage">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Search.Extended.Administration.ResourceStorage.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Security">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Taxonomy">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.SharePoint.Taxonomy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Web.Administration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.CommandUI">
+      <HintPath>..\..\SPExportMetadata\bin\x64\Debug\Microsoft.Web.CommandUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

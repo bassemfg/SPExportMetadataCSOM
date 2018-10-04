@@ -13,31 +13,39 @@ using Microsoft.SharePoint.Client;
 
 namespace SPExportMetadataCSOM
 {
-    public partial class Form1 : Form
+    public partial class Form1 : System.Windows.Forms.Form
     {
+
         public Form1()
         {
             InitializeComponent();
         }
 
+        string siteUrl;
+
         private void btnRun_Click(object sender, EventArgs e)
 
         {
+            this.Cursor= Cursors.WaitCursor;
             //pass SharePoint Online credentials to get ClientContext object
-            string securePassword = "";// SecureString $PassWord
-            SharePointOnlineCredentials spoCred = new SharePointOnlineCredentials(UserName, securePassword);
-            ClientContext ctx = new ClientContext(siteUrl);
+            System.Security.SecureString securePassword = new System.Security.SecureString();// SecureString $PassWord
+            string password = txtPwd.Text;
+            string userName = txtUID.Text;
+            foreach (char c in password.ToCharArray())
+                securePassword.AppendChar(c);
+            SharePointOnlineCredentials spoCred = new SharePointOnlineCredentials(userName, securePassword);
+            ClientContext ctx = new ClientContext(txtSiteURL.Text);
             ctx.Credentials = spoCred;
             Web web = ctx.Web;
             ctx.Load(web);
             ctx.ExecuteQuery();
             //call the function that does the inventory of the site collection    
             GetSPOSites(web, ctx);
-
+            this.Cursor = Cursors.Default;
         }
 
         private void GetSPOSites(Web RootWeb, ClientContext Context)
-        { 
+        {
 
 
             string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
@@ -48,102 +56,134 @@ namespace SPExportMetadataCSOM
 
             StreamWriter sw = null;
 
-             //Create array variable to store data
+            //Create array variable to store data
+            string itemTitle;
+            try
+            {
+                //get all webs under root web
+                WebCollection Webs = RootWeb.Webs;
+                Context.Load(Webs);
+                Context.ExecuteQuery();
+                if (Webs.Count > 0)
+                    // loop through the webs
+                    foreach (Web sWeb in Webs)
+                    {
+                        Console.WriteLine(sWeb.Url);
+                        siteUrl = sWeb.Url;
+                        //get all lists in web
+                        ListCollection AllLists = sWeb.Lists;
+                        Context.Load(AllLists);
+                        Context.ExecuteQuery();
+                        //loop through all lists in web
+                        foreach (List list in AllLists)
+                        {
+                            Console.WriteLine("List: " + list.Title);
+                            //get list title
+                            string listTitle = list.Title;
 
-            //get all webs under root web
-           WebCollection Webs = RootWeb.Webs;
-            Context.Load(Webs);
-            Context.ExecuteQuery();
-// loop through the webs
-        foreach(Web sWeb in Webs)
-        {
-            Write - Host $sWeb.url
-            $siteUrl = $sWeb.Url;
-            #get all lists in web
-            $AllLists = $sWeb.Lists
-            $Context.Load($AllLists)
-            $Context.ExecuteQuery()
-            #loop through all lists in web
-            ForEach($list in $AllLists){
-                Write - Host List: $list.Title
-              #get list title
-              $listTitle = $list.Title;
+                            if (list.BaseType == BaseType.DocumentLibrary && list.Hidden == false)
+                            {
 
-# Do not inventory the following lists -> User Information List, Workflow History, Images, Site Assets, Composed Looks, Microfeed, Workflow Tasks, Access Requests, Master Page Gallery, Web Part Gallery, Style Library, List Template Library
-# NOTE: Add to (or remove from) the list below, as needed.
+                                //Create a CAML Query object
+                                //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
+                                //In this script an undefined CamlQuery object is passed, to get all list items 
+                                CamlQuery camlQuery = new CamlQuery();
+                                ListItemCollection AllItems = list.GetItems(camlQuery);
+                                Context.Load(AllItems);
+                                Context.ExecuteQuery();
+                                if (AllItems.Count > 0)
+                                {
 
-                If($listTitle - ne 'User Information List' - and `
-                 $listTitle - ne 'Workflow History' - and `
-                 $listTitle - ne 'Images' - and `
-                 $listTitle - ne 'Site Assets' - and `
-                 $listTitle - ne 'Composed Looks' - and `
-                 $listTitle - ne 'Microfeed' - and `
-                 $listTitle - ne 'Workflow Tasks' - and `
-                 $listTitle - ne 'Access Requests' - and `
-                 $listTitle - ne 'Master Page Gallery' - and  `
-                 $listTitle - ne 'Web Part Gallery' - and `
-                 $listTitle - ne 'Style Library' - and `
-                 $listTitle - ne 'List Template Library') {
-                
-                 #Create a CAML Query object
-                 #You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
-                 #In this script an undefined CamlQuery object is passed, to get all list items 
-                 $camlQuery = New - Object Microsoft.SharePoint.Client.CamlQuery
-                  $AllItems = $list.GetItems($camlQuery)
-                  $Context.Load($AllItems)
-                  $Context.ExecuteQuery()
-                  If($AllItems.Count - gt 0) {
-                        ForEach($item in $AllItems){
-                                                   
-                          $listType = $list.BaseTemplate
-                                $listUrl = $item["FileDirRef"]
-                                #set item title based on the type of list
-                          switch ($listType) 
-                           {
-                                101 { $itemTitle = $item["FileLeafRef"] }    #Document Library
-                                103 { $itemTitle = $item["FileLeafRef"] }    #Links List
-                                109 { $itemTitle = $item["FileLeafRef"] }    #Picture Library
-                                119 { $itemTitle = $item["FileLeafRef"] }    #Site Pages
-                                851 { $itemTitle = $item["FileLeafRef"] }    #Media
-                                default { $itemTitle = $item["Title"] }
+                                    j = 0;
+
+                                    foreach (ListItem item in AllItems)
+                                    {
+                                        Context.Load(item);
+                                        Context.ExecuteQuery();
+
+                                        Console.WriteLine("Processing item " + item.Id);
+                                        /*
+                                    if (j == 0)
+                                    {
+                                        sbFields.Append("SourcePath");
+                                        sbFields.Append(',');
+                                        sbFields.Append("UniqueId");
+                                        sbFields.Append(',');
+                                        sbFields.Append("SiteURL");
+                                        sbFields.Append(',');
+
+                                    }
+
+                                    sbVals.Append(item["URL Path"].ToString().Replace(',', ' '));
+                                    sbVals.Append(',');
+
+                                    sbVals.Append(item["UniqueId"].ToString());
+                                    sbVals.Append(',');
+
+
+                                    sbVals.Append(sWeb.Url);
+                                    sbVals.Append(',');
+                                    */
+                                        for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
+                                        {
+                                            try
+                                            {
+                                                string fieldKey = item.FieldValues.ElementAt(ctrFields).Key;
+                                                string fieldValue = item.FieldValues.ElementAt(ctrFields).Value.ToString();
+
+                                                //if (field.Hidden == false && field.Sealed == false)
+                                                {
+                                                    if (j == 0)
+                                                    {
+                                                        sbFields.Append(fieldKey.ToString());
+                                                        sbFields.Append(',');
+                                                    }
+
+                                                    if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>"))
+                                                        sbVals.Append(fieldValue.Replace(',', ' ').Replace(@"
+",""));
+                                                    else
+                                                        sbVals.Append(" ");
+
+                                                    sbVals.Append(',');
+
+                                                }
+                                            }
+                                            catch { }
+                                        }
+                                        //remove last ','
+                                        if (sbFields.Length > 0)
+                                            sbFields.Length = sbFields.Length - 1;
+                                        if (sbVals.Length > 0)
+                                            sbVals.Length = sbVals.Length - 1;
+                                        // add new lines
+                                        sbFields.Append(@"
+"); sbVals.Append(@"
+");
+                                        j++;
+
+                                    }
+                                }
+                                sbFields.Append(sbVals.ToString());
+                                sbFields.Append(@"
+");
+                                sbVals.Clear();
                             }
-                            Write - Host Item Name: $itemTitle
-                               
-                          #retrieve item values
-                          $itemType = $item.FileSystemObjectType
-                                $itemurl = $item["FileRef"]
-                                $itemCreatedBy = $item["Author"].LookupValue
-                                $itemCreated = $item["Created"]
-                                $itemModifiedBy = $item["Editor"].LookupValue
-                                $itemModified = $item["Modified"]
-                                #store the item values
-                          #earlier versions (v2) of PowerShell do not support [Ordered]. If so, remove [Ordered]. Columns will be randomly ordered, but can be rearranged manually in the CSV file
-                          $props = [Ordered]@{
-                                'Site' = $siteUrl;
-                                'List Title' = $listTitle;
-                                'List URL' = $listUrl;
-                                'List Type' = $listType;
-                                'Item Title' = $itemTitle;
-                                'Item URL' = $itemUrl;
-                                'Item Type' = $itemType;
-                                'Created By' = $itemCreatedBy;
-                                'Created' = $itemCreated;
-                                'Modified By' = $itemModifiedBy;
-                                'Modified' = $itemModified};                      
-                          #append the values to the existing array object 
-                          $siteitemarray = New - Object - TypeName PSObject - Property $props; $siteitems += $siteitemarray
-                         } #end loop for all items in list
-                 } #check if item count is > 0
-            } #check if it is a 'do not inventory' list          
-          
-          } #end loop for all lists in site 
-          
-          Get - SPOSites - RootWeb $sWeb - Context $Context #recursive call          
-        } #end loop for all sites in site collection     
-    
-    #Output site collection inventory to CSV 
-    $siteitems | Export-Csv $OutputFile -Append
-    }
+
+                        }
+                        sw = new StreamWriter(@"c:\test\metadata_" + sWeb.Url.Substring(sWeb.Url.LastIndexOf(@"/") + 1) + @".csv");
+
+                        sw.Write(sbFields.ToString());
+                        sw.Write(sbVals.ToString());
+                        sw.Flush();
+                        sw.Close();
+                        sbFields.Clear();
+                        sbVals.Clear();
+                        GetSPOSites(sWeb, Context);
+
+                    }
+            }
+            catch (Exception e){ }
 
         }
     }
