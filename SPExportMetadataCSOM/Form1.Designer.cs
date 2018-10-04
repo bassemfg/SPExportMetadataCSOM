@@ -97,7 +97,7 @@
             this.txtSiteURL.Name = "txtSiteURL";
             this.txtSiteURL.Size = new System.Drawing.Size(174, 20);
             this.txtSiteURL.TabIndex = 6;
-            this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/sites/accounting";
+            this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/";
             // 
             // Form1
             // 
