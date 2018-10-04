@@ -35,6 +35,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.txtSiteURL = new System.Windows.Forms.TextBox();
+            this.txtOutput = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // txtUID
@@ -59,7 +60,7 @@
             this.btnRun.Location = new System.Drawing.Point(111, 173);
             this.btnRun.Name = "btnRun";
             this.btnRun.Size = new System.Drawing.Size(75, 23);
-            this.btnRun.TabIndex = 2;
+            this.btnRun.TabIndex = 3;
             this.btnRun.Text = "Generate";
             this.btnRun.UseVisualStyleBackColor = true;
             this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
@@ -96,14 +97,23 @@
             this.txtSiteURL.Location = new System.Drawing.Point(111, 116);
             this.txtSiteURL.Name = "txtSiteURL";
             this.txtSiteURL.Size = new System.Drawing.Size(174, 20);
-            this.txtSiteURL.TabIndex = 6;
+            this.txtSiteURL.TabIndex = 2;
             this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/";
+            // 
+            // txtOutput
+            // 
+            this.txtOutput.Location = new System.Drawing.Point(27, 218);
+            this.txtOutput.Name = "txtOutput";
+            this.txtOutput.Size = new System.Drawing.Size(324, 220);
+            this.txtOutput.TabIndex = 6;
+            this.txtOutput.Text = "";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(363, 450);
+            this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.txtSiteURL);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -127,6 +137,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtSiteURL;
+        private System.Windows.Forms.RichTextBox txtOutput;
     }
 }
 

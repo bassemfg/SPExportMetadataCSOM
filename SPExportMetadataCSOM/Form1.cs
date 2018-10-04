@@ -34,20 +34,20 @@ namespace SPExportMetadataCSOM
             foreach (char c in password.ToCharArray())
                 securePassword.AppendChar(c);
             SharePointOnlineCredentials spoCred = new SharePointOnlineCredentials(userName, securePassword);
+            
             ClientContext ctx = new ClientContext(txtSiteURL.Text);
             ctx.Credentials = spoCred;
             Web web = ctx.Web;
             ctx.Load(web);
             ctx.ExecuteQuery();
             //call the function that does the inventory of the site collection    
-            GetSPOSites(web, ctx);
+            List<string> processedSites = new List<string>();
+            GetSPOSites(web, ctx, processedSites);
             this.Cursor = Cursors.Default;
         }
 
-        private void GetSPOSites(Web RootWeb, ClientContext Context)
+        private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites)
         {
-
-
             string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
             //int i = 0;
             int j = 0;
@@ -62,137 +62,170 @@ namespace SPExportMetadataCSOM
             {
                 //get all webs under root web
                 WebCollection Webs = RootWeb.Webs;
+
                 Context.Load(Webs);
                 Context.ExecuteQuery();
-                if (Webs.Count > 0)
-                    // loop through the webs
-                    foreach (Web sWeb in Webs)
+                //
+                // loop through the webs
+                List<Web> allWebs = Webs.ToList();
+                allWebs.Insert(0, RootWeb);
+                if (allWebs.Count > 0)
+                    foreach (Web sWeb in allWebs)
                     {
-                        try
+                        if (!ProcessedSites.Contains(sWeb.Url))
                         {
-                            Console.WriteLine(sWeb.Url);
-                            siteUrl = sWeb.Url;
-                            //get all lists in web
-                            ListCollection AllLists = sWeb.Lists;
-                            Context.Load(AllLists);
-                            Context.ExecuteQuery();
-                            //loop through all lists in web
-                            foreach (List list in AllLists)
+                            try
                             {
-                                try
+                                //Console.WriteLine(sWeb.Url);
+                                txtOutput.Text+="Processing site: " + sWeb.Url + @"
+";
+
+                                txtOutput.SelectionStart = txtOutput.Text.Length;
+                                txtOutput.ScrollToCaret();
+
+                                siteUrl = sWeb.Url;
+                                ProcessedSites.Add(siteUrl);
+                                //get all lists in web
+                                ListCollection AllLists = sWeb.Lists;
+                                Context.Load(AllLists);
+                                Context.ExecuteQuery();
+                                //loop through all lists in web
+                                foreach (List list in AllLists)
                                 {
-                                    Console.WriteLine("List: " + list.Title);
-                                    //get list title
-                                    string listTitle = list.Title;
-
-                                    if (list.BaseType == BaseType.DocumentLibrary && list.Hidden == false)
+                                    try
                                     {
+                                        //Console.WriteLine("List: " + list.Title);
+                                        txtOutput.Text += "Processing list: " + list.Title + @"
+";
 
-                                        //Create a CAML Query object
-                                        //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
-                                        //In this script an undefined CamlQuery object is passed, to get all list items 
-                                        CamlQuery camlQuery = new CamlQuery();
-                                        ListItemCollection AllItems = list.GetItems(camlQuery);
-                                        Context.Load(AllItems);
-                                        Context.ExecuteQuery();
-                                        if (AllItems.Count > 0)
+                                        txtOutput.SelectionStart = txtOutput.Text.Length;
+                                        txtOutput.ScrollToCaret();
+
+                                        //get list title
+                                        string listTitle = list.Title;
+
+                                        if (list.BaseType == BaseType.DocumentLibrary && list.Hidden == false)
                                         {
 
-                                            j = 0;
+                                            //Create a CAML Query object
+                                            //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
+                                            //In this script an undefined CamlQuery object is passed, to get all list items 
+                                            CamlQuery camlQuery = new CamlQuery();
+                                            camlQuery.ViewXml = 
+@"< View Scope = ""RecursiveAll"" >
+    < Query >
+    </ Query >
+</ View >";
 
-                                            foreach (ListItem item in AllItems)
+
+                                            ListItemCollection AllItems = list.GetItems(camlQuery);
+                                            Context.Load(AllItems);
+                                            Context.ExecuteQuery();
+                                            if (AllItems.Count > 0)
                                             {
-                                                Context.Load(item);
-                                                Context.ExecuteQuery();
 
-                                                Console.WriteLine("Processing item " + item.Id);
-                                                /*
-                                            if (j == 0)
-                                            {
-                                                sbFields.Append("SourcePath");
-                                                sbFields.Append(',');
-                                                sbFields.Append("UniqueId");
-                                                sbFields.Append(',');
-                                                sbFields.Append("SiteURL");
-                                                sbFields.Append(',');
+                                                j = 0;
 
-                                            }
-
-                                            sbVals.Append(item["URL Path"].ToString().Replace(',', ' '));
-                                            sbVals.Append(',');
-
-                                            sbVals.Append(item["UniqueId"].ToString());
-                                            sbVals.Append(',');
-
-
-                                            sbVals.Append(sWeb.Url);
-                                            sbVals.Append(',');
-                                            */
-                                                for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
+                                                foreach (ListItem item in AllItems)
                                                 {
-                                                    try
-                                                    {
-                                                        string fieldKey = item.FieldValues.ElementAt(ctrFields).Key;
-                                                        string fieldValue = item.FieldValues.ElementAt(ctrFields).Value.ToString();
+                                                    Context.Load(item);
+                                                    Context.ExecuteQuery();
 
-                                                        //if (field.Hidden == false && field.Sealed == false)
-                                                        {
-                                                            if (j == 0)
-                                                            {
-                                                                sbFields.Append(fieldKey.ToString());
-                                                                sbFields.Append(',');
-                                                            }
+                                                    //Console.WriteLine("Processing item " + item.Id);
+                                                    txtOutput.Text += "Processing item: " + item.Id+ @"
+";
+                                                    txtOutput.SelectionStart = txtOutput.Text.Length;
+                                                    txtOutput.ScrollToCaret();
+                                                    /*
+                                                if (j == 0)
+                                                {
+                                                    sbFields.Append("SourcePath");
+                                                    sbFields.Append(',');
+                                                    sbFields.Append("UniqueId");
+                                                    sbFields.Append(',');
+                                                    sbFields.Append("SiteURL");
+                                                    sbFields.Append(',');
 
-                                                            if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>") && !fieldValue.Contains("</"))
-                                                                sbVals.Append(fieldValue.Replace(',', ' ').Replace(@"
-", ""));
-                                                            else
-                                                                sbVals.Append(" ");
-
-                                                            sbVals.Append(',');
-
-                                                        }
-                                                    }
-                                                    catch { }
                                                 }
-                                                //remove last ','
-                                                if (sbFields.Length > 0)
-                                                    sbFields.Length = sbFields.Length - 1;
-                                                if (sbVals.Length > 0)
-                                                    sbVals.Length = sbVals.Length - 1;
-                                                // add new lines
-                                                sbFields.Append(@"
+
+                                                sbVals.Append(item["URL Path"].ToString().Replace(',', ' '));
+                                                sbVals.Append(',');
+
+                                                sbVals.Append(item["UniqueId"].ToString());
+                                                sbVals.Append(',');
+
+
+                                                sbVals.Append(sWeb.Url);
+                                                sbVals.Append(',');
+                                                */
+                                                    for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
+                                                    {
+                                                        try
+                                                        {
+                                                            string fieldKey = item.FieldValues.ElementAt(ctrFields).Key;
+                                                            string fieldValue;
+                                                            try { fieldValue = item.FieldValues.ElementAt(ctrFields).Value.ToString(); } catch { fieldValue = " "; }
+
+                                                            //if (field.Hidden == false && field.Sealed == false)
+                                                            {
+                                                                if (j == 0)
+                                                                {
+                                                                    sbFields.Append(fieldKey.ToString());
+                                                                    sbFields.Append(',');
+                                                                }
+
+                                                                if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>") && !fieldValue.Contains("</"))
+                                                                    sbVals.Append(fieldValue.Replace(',', ' ').Replace(@"
+", ""));
+                                                                else
+                                                                    sbVals.Append(" ");
+
+                                                                sbVals.Append(',');
+
+                                                            }
+                                                        }
+                                                        catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
+                                                    }
+                                                    //remove last ','
+                                                    if (sbFields.Length > 0)
+                                                        sbFields.Length = sbFields.Length - 1;
+                                                    if (sbVals.Length > 0)
+                                                        sbVals.Length = sbVals.Length - 1;
+                                                    // add new lines
+                                                    sbFields.Append(@"
 "); sbVals.Append(@"
 ");
-                                                j++;
+                                                    j++;
 
+                                                }
                                             }
-                                        }
-                                        sbFields.Append(sbVals.ToString());
-                                        sbFields.Append(@"
+                                            sbFields.Append(sbVals.ToString());
+                                            sbFields.Append(@"
 ");
-                                        sbVals.Clear();
+                                            sbVals.Clear();
+                                        }
+                                    }
+                                    catch (Exception e) {
+                                        System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue);
                                     }
                                 }
-                                catch (Exception e) { }
                             }
+                            catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
+
+                            sw = new StreamWriter(@"c:\test\metadata_" + sWeb.Url.Substring(sWeb.Url.LastIndexOf(@"/") + 1) + @".csv");
+
+                            sw.Write(sbFields.ToString());
+                            sw.Write(sbVals.ToString());
+                            sw.Flush();
+                            sw.Close();
+                            sbFields.Clear();
+                            sbVals.Clear();
+                            GetSPOSites(sWeb, Context, ProcessedSites);
                         }
-                        catch (Exception e) { }
-
-                        sw = new StreamWriter(@"c:\test\metadata_" + sWeb.Url.Substring(sWeb.Url.LastIndexOf(@"/") + 1) + @".csv");
-
-                        sw.Write(sbFields.ToString());
-                        sw.Write(sbVals.ToString());
-                        sw.Flush();
-                        sw.Close();
-                        sbFields.Clear();
-                        sbVals.Clear();
-                        GetSPOSites(sWeb, Context);
-
                     }
             }
-            catch (Exception e) { }
-
+            catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
+        
         }
     }
 }
