@@ -96,7 +96,7 @@
             // 
             this.txtSiteURL.Location = new System.Drawing.Point(111, 116);
             this.txtSiteURL.Name = "txtSiteURL";
-            this.txtSiteURL.Size = new System.Drawing.Size(174, 20);
+            this.txtSiteURL.Size = new System.Drawing.Size(240, 20);
             this.txtSiteURL.TabIndex = 2;
             this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/";
             // 
@@ -110,6 +110,7 @@
             // 
             // Form1
             // 
+            this.AcceptButton = this.btnRun;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(363, 450);

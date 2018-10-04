@@ -58,12 +58,12 @@ namespace SPExportMetadataCSOM
     @"< View Scope = 'RecursiveAll'>
     < Query >
         <Where>
+<Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='False' Type='DateTime'>" + new DateTime(2018, 8, 1).ToShortDateString() + @"</Value></Gt>
         </Where>
-        <OrderBy>
-            <FieldRef Name='ID' />
-        </OrderBy>
+       
     </ Query >
 </ View >";
+
 
             ListItemCollection AllItems = list.GetItems(camlQuery);
             Context.Load(AllItems);
@@ -162,7 +162,7 @@ namespace SPExportMetadataCSOM
                                                     Context.ExecuteQuery();
 
                                                     //Console.WriteLine("Processing item " + item.Id);
-                                                    txtOutput.Text += "Processing item: " + item.Id+ @"
+                                                    txtOutput.Text += "Processing file: " + j + " of " + AllItems.Count + " in current list: " + list.Title + @"
 ";
                                                     txtOutput.SelectionStart = txtOutput.Text.Length;
                                                     txtOutput.ScrollToCaret();
