@@ -42,7 +42,7 @@
             // 
             this.txtUID.Location = new System.Drawing.Point(111, 24);
             this.txtUID.Name = "txtUID";
-            this.txtUID.Size = new System.Drawing.Size(174, 20);
+            this.txtUID.Size = new System.Drawing.Size(282, 20);
             this.txtUID.TabIndex = 0;
             this.txtUID.Text = "boxmigration@originmaterials.com";
             // 
@@ -51,13 +51,13 @@
             this.txtPwd.Location = new System.Drawing.Point(111, 70);
             this.txtPwd.Name = "txtPwd";
             this.txtPwd.PasswordChar = '*';
-            this.txtPwd.Size = new System.Drawing.Size(174, 20);
+            this.txtPwd.Size = new System.Drawing.Size(282, 20);
             this.txtPwd.TabIndex = 1;
             this.txtPwd.Text = "BoxShuttle718";
             // 
             // btnRun
             // 
-            this.btnRun.Location = new System.Drawing.Point(111, 173);
+            this.btnRun.Location = new System.Drawing.Point(27, 189);
             this.btnRun.Name = "btnRun";
             this.btnRun.Size = new System.Drawing.Size(75, 23);
             this.btnRun.TabIndex = 3;
@@ -88,15 +88,17 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(24, 123);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(50, 13);
+            this.label3.Size = new System.Drawing.Size(61, 13);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Site URL";
+            this.label3.Text = "Site URL(s)";
             // 
             // txtSiteURL
             // 
             this.txtSiteURL.Location = new System.Drawing.Point(111, 116);
+            this.txtSiteURL.Multiline = true;
             this.txtSiteURL.Name = "txtSiteURL";
-            this.txtSiteURL.Size = new System.Drawing.Size(240, 20);
+            this.txtSiteURL.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtSiteURL.Size = new System.Drawing.Size(282, 66);
             this.txtSiteURL.TabIndex = 2;
             this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/";
             // 
@@ -104,7 +106,7 @@
             // 
             this.txtOutput.Location = new System.Drawing.Point(27, 218);
             this.txtOutput.Name = "txtOutput";
-            this.txtOutput.Size = new System.Drawing.Size(324, 220);
+            this.txtOutput.Size = new System.Drawing.Size(366, 220);
             this.txtOutput.TabIndex = 6;
             this.txtOutput.Text = "";
             // 
@@ -113,7 +115,7 @@
             this.AcceptButton = this.btnRun;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(363, 450);
+            this.ClientSize = new System.Drawing.Size(418, 450);
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.txtSiteURL);
             this.Controls.Add(this.label3);

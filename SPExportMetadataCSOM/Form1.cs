@@ -34,21 +34,31 @@ namespace SPExportMetadataCSOM
             foreach (char c in password.ToCharArray())
                 securePassword.AppendChar(c);
             SharePointOnlineCredentials spoCred = new SharePointOnlineCredentials(userName, securePassword);
-            
-            ClientContext ctx = new ClientContext(txtSiteURL.Text);
-            ctx.Credentials = spoCred;
-            Web web = ctx.Web;
-            ctx.Load(web);
-            ctx.ExecuteQuery();
-            //call the function that does the inventory of the site collection    
-            List<string> processedSites = new List<string>();
-            GetSPOSites(web, ctx, processedSites);
+
+            ClientContext ctx;
+
+            foreach (string url in txtSiteURL.Text.Split( '\n' ))
+            {
+                try
+                {
+                    ctx = new ClientContext(url.Replace('\r', '/'));
+
+                    ctx.Credentials = spoCred;
+                    Web web = ctx.Web;
+                    ctx.Load(web);
+                    ctx.ExecuteQuery();
+                    //call the function that does the inventory of the site collection    
+                    List<string> processedSites = new List<string>();
+                    GetSPOSites(web, ctx, processedSites);
+                }
+                catch { }
+            }
             this.Cursor = Cursors.Default;
         }
 
-        CamlQuery camlQuery = new CamlQuery();
+        //CamlQuery camlQuery = new CamlQuery();
 
-        private List<ListItem> GetAllItems( ClientContext Context, List list, List<ListItem>  ListItems)
+        private List<ListItem> GetAllItems( ClientContext Context, List list, List<ListItem>  ListItems, CamlQuery camlQuery)
         {
             //Create a CAML Query object
             //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
@@ -58,11 +68,13 @@ namespace SPExportMetadataCSOM
     @"< View Scope = 'RecursiveAll'>
     < Query >
         <Where>
-<Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='False' Type='DateTime'>" + new DateTime(2018, 8, 1).ToShortDateString() + @"</Value></Gt>
-        </Where>
-       
+       </Where>
+       <OrderBy>
+            <FieldRef Name='Modified' />
+        </OrderBy>
     </ Query >
 </ View >";
+            //<Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='False' Type='DateTime'>" + new DateTime(2018, 8, 1).ToShortDateString() + @"</Value></Gt>
 
 
             ListItemCollection AllItems = list.GetItems(camlQuery);
@@ -80,7 +92,7 @@ namespace SPExportMetadataCSOM
                 if (item.FileSystemObjectType == FileSystemObjectType.Folder)
                 {
                     camlQuery.FolderServerRelativeUrl = item.FieldValues["FileRef"].ToString();
-                    GetAllItems(Context, list, ListItems);
+                    GetAllItems(Context, list, ListItems, camlQuery);
                 }
 
 
@@ -149,8 +161,8 @@ namespace SPExportMetadataCSOM
 
                                         if (list.BaseType == BaseType.DocumentLibrary && list.Hidden == false)
                                         {
-                                            List<ListItem> AllItems = GetAllItems(Context,list,new List<ListItem>() );
-
+                                            List<ListItem> AllItems = GetAllItems(Context,list,new List<ListItem>(), new CamlQuery() );
+                                            
                                             if (AllItems.Count > 0)
                                             {
 
@@ -221,7 +233,7 @@ namespace SPExportMetadataCSOM
                             }
                             catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
 
-                            sw = new StreamWriter(@"c:\test\metadata_" + sWeb.Url.Substring(sWeb.Url.LastIndexOf(@"/") + 1) + @".csv");
+                            sw = new StreamWriter(@"c:\test\metadata_" + sWeb.Url.Substring(sWeb.Url.LastIndexOf(@"/") + 1) + DateTime.Now.ToFileTimeUtc().ToString() + @".csv");
 
                             sw.Write(sbFields.ToString());
                             sw.Write(sbVals.ToString());
