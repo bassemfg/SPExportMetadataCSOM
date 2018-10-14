@@ -23,22 +23,37 @@ namespace SPExportMetadataCSOM
 
         string siteUrl;
 
-        private void btnRun_Click(object sender, EventArgs e)
+        private  void btnRun_Click(object sender, EventArgs e)
 
         {
             this.Cursor = Cursors.WaitCursor;
-            //pass SharePoint Online credentials to get ClientContext object
-            System.Security.SecureString securePassword = new System.Security.SecureString();// SecureString $PassWord
+            this.btnRun.Enabled = false;
             string password = txtPwd.Text;
             string userName = txtUID.Text;
+
+
+            var task =  GetResponseAsync<Task>(userName, password, txtSiteURL.Text);
+            //var items = await task;
+
+            this.Cursor = Cursors.Default;
+            this.btnRun.Enabled = true;
+        }
+       
+public async static Task<List<T>> GetResponseAsync<T>(string username, string password, string siteUrls)
+        {
+
+
+            //pass SharePoint Online credentials to get ClientContext object
+            System.Security.SecureString securePassword = new System.Security.SecureString();// SecureString $PassWord
             foreach (char c in password.ToCharArray())
                 securePassword.AppendChar(c);
-            SharePointOnlineCredentials spoCred = new SharePointOnlineCredentials(userName, securePassword);
+            SharePointOnlineCredentials spoCred = new SharePointOnlineCredentials(username, securePassword);
 
             ClientContext ctx;
-
-            foreach (string url in txtSiteURL.Text.Split( '\n' ))
+            //Task lastTask=null;
+            foreach (string url in siteUrls.Split( '\n' ))
             {
+
                 try
                 {
                     ctx = new ClientContext(url.Replace('\r', '/'));
@@ -49,16 +64,28 @@ namespace SPExportMetadataCSOM
                     ctx.ExecuteQuery();
                     //call the function that does the inventory of the site collection    
                     List<string> processedSites = new List<string>();
-                    GetSPOSites(web, ctx, processedSites);
+                    // The await causes the handler to return immediately.
+                    var fileName = @"c:\test\temp" + DateTime.Now.ToFileTime().ToString() + ".csv";
+                    var swTemp = new StreamWriter(fileName, true);
+
+                    await System.Threading.Tasks.Task.Run(() => GetSPOSites(web, ctx, processedSites, swTemp));
+                    // Now update the UI with the results.
+                    // ...
                 }
-                catch { }
+
+    
+                
+                
+                catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
+
             }
-            this.Cursor = Cursors.Default;
+
+            return null;
         }
 
         //CamlQuery camlQuery = new CamlQuery();
 
-        private List<ListItem> GetAllItems( ClientContext Context, List list, List<ListItem>  ListItems, CamlQuery camlQuery)
+        private static List<ListItem> GetAllItems( ClientContext Context, List list, List<ListItem>  ListItems, CamlQuery camlQuery)
         {
             //Create a CAML Query object
             //You can pass an undefined CamlQuery object to return all items from the list, or use the ViewXml property to define a CAML query and return items that meet specific criteria - https://msdn.microsoft.com/en-us/library/office/ee534956(v=office.14).aspx#sectionSection0
@@ -100,8 +127,7 @@ namespace SPExportMetadataCSOM
 
             return ListItems;
         }
-
-        private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites)
+        private async static System.Threading.Tasks.Task GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites, StreamWriter swTemp)
         {
             int lineIndex = 0;
             string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
@@ -133,13 +159,13 @@ namespace SPExportMetadataCSOM
                             try
                             {
                                 //Console.WriteLine(sWeb.Url);
-                                txtOutput.Text+="Processing site: " + sWeb.Url + @"
-";
+                                //txtOutput.Text+="Processing site: " + sWeb.Url + @"
+//";
 
-                                txtOutput.SelectionStart = txtOutput.Text.Length;
-                                txtOutput.ScrollToCaret();
+                                //txtOutput.SelectionStart = txtOutput.Text.Length;
+                                //txtOutput.ScrollToCaret();
 
-                                siteUrl = sWeb.Url;
+                                var siteUrl = sWeb.Url;
                                 ProcessedSites.Add(siteUrl);
                                 //get all lists in web
                                 ListCollection AllLists = sWeb.Lists;
@@ -151,11 +177,11 @@ namespace SPExportMetadataCSOM
                                     try
                                     {
                                         //Console.WriteLine("List: " + list.Title);
-                                        txtOutput.Text += "Processing list: " + list.Title + @"
-";
+                                        //txtOutput.Text += "Processing list: " + list.Title + @"
+//";
 
-                                        txtOutput.SelectionStart = txtOutput.Text.Length;
-                                        txtOutput.ScrollToCaret();
+                                        //txtOutput.SelectionStart = txtOutput.Text.Length;
+                                        //txtOutput.ScrollToCaret();
 
                                         //get list title
                                         string listTitle = list.Title;
@@ -175,10 +201,10 @@ namespace SPExportMetadataCSOM
                                                     Context.ExecuteQuery();
 
                                                     //Console.WriteLine("Processing item " + item.Id);
-                                                    txtOutput.Text += "Processing file: " + j + " of " + AllItems.Count + " in current list: " + list.Title + @"
-";
-                                                    txtOutput.SelectionStart = txtOutput.Text.Length;
-                                                    txtOutput.ScrollToCaret();
+                                                    //txtOutput.Text += "Processing file: " + j + " of " + AllItems.Count + " in current list: " + list.Title + @"
+//";
+                                                    //txtOutput.SelectionStart = txtOutput.Text.Length;
+                                                    //txtOutput.ScrollToCaret();
                                                  
                                                     for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
                                                     {
@@ -214,8 +240,10 @@ namespace SPExportMetadataCSOM
                                                     if (sbVals.Length > 0)
                                                         sbVals.Length = sbVals.Length - 1;
                                                     var lastLine = sbVals.ToString(lineIndex, sbVals.Length - lineIndex).Trim();
-                                                    var swTemp = new StreamWriter("c:\test\temp.csv", true);
-                                                    swTemp.WriteLine(swTemp);
+                                                    
+                                                    swTemp.WriteLine(lastLine);
+                                                    swTemp.Flush();
+                                                    swTemp.Close();
                                                     // add new lines
                                                     sbFields.Append(@"
 ");
@@ -247,12 +275,13 @@ namespace SPExportMetadataCSOM
                             sw.Close();
                             sbFields.Clear();
                             sbVals.Clear();
-                            GetSPOSites(sWeb, Context, ProcessedSites);
+                            await GetSPOSites(sWeb, Context, ProcessedSites, swTemp);
                         }
                     }
             }
             catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
-        
+
+            //return null;
         }
     }
 }
