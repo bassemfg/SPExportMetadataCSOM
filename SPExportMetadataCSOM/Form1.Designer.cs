@@ -44,7 +44,7 @@
             this.txtUID.Name = "txtUID";
             this.txtUID.Size = new System.Drawing.Size(282, 20);
             this.txtUID.TabIndex = 0;
-            this.txtUID.Text = "boxmigration@originmaterials.com";
+            this.txtUID.Text = "spmigration@tampaairport.com";
             // 
             // txtPwd
             // 
@@ -53,7 +53,7 @@
             this.txtPwd.PasswordChar = '*';
             this.txtPwd.Size = new System.Drawing.Size(282, 20);
             this.txtPwd.TabIndex = 1;
-            this.txtPwd.Text = "BoxShuttle718";
+            this.txtPwd.Text = "BoxMigration@018";
             // 
             // btnRun
             // 
@@ -100,7 +100,7 @@
             this.txtSiteURL.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtSiteURL.Size = new System.Drawing.Size(282, 66);
             this.txtSiteURL.TabIndex = 2;
-            this.txtSiteURL.Text = "https://micromidasincorporated.sharepoint.com/";
+            this.txtSiteURL.Text = "https://tampaairport.sharepoint.com/sites/MasterPlan";
             // 
             // txtOutput
             // 

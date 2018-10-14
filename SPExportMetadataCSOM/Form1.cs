@@ -103,6 +103,7 @@ namespace SPExportMetadataCSOM
 
         private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites)
         {
+            int lineIndex = 0;
             string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
             //int i = 0;
             int j = 0;
@@ -212,9 +213,14 @@ namespace SPExportMetadataCSOM
                                                         sbFields.Length = sbFields.Length - 1;
                                                     if (sbVals.Length > 0)
                                                         sbVals.Length = sbVals.Length - 1;
+                                                    var lastLine = sbVals.ToString(lineIndex, sbVals.Length - lineIndex).Trim();
+                                                    var swTemp = new StreamWriter("c:\test\temp.csv", true);
+                                                    swTemp.WriteLine(swTemp);
                                                     // add new lines
                                                     sbFields.Append(@"
-"); sbVals.Append(@"
+");
+                                                    lineIndex = sbVals.Length;
+                                                    sbVals.Append(@"
 ");
                                                     j++;
 
