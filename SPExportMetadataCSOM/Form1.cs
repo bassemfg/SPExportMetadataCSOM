@@ -68,14 +68,14 @@ namespace SPExportMetadataCSOM
     @"< View Scope = 'RecursiveAll'>
     < Query >
         <Where>
-       </Where>
+       </Where> <Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='False' Type='DateTime'>" + new DateTime(2018, 9, 27).ToShortDateString() + @"</Value></Gt>
+
        <OrderBy>
             <FieldRef Name='Modified' />
         </OrderBy>
     </ Query >
 </ View >";
-            //<Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='False' Type='DateTime'>" + new DateTime(2018, 8, 1).ToShortDateString() + @"</Value></Gt>
-
+           
 
             ListItemCollection AllItems = list.GetItems(camlQuery);
             Context.Load(AllItems);
@@ -196,7 +196,7 @@ namespace SPExportMetadataCSOM
                                                                 }
 
                                                                 if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>") && !fieldValue.Contains("</"))
-                                                                    sbVals.Append(fieldValue.Replace(',', ' ').Replace(@"
+                                                                    sbVals.Append(fieldValue.Replace(",", "$^*").Replace(@"
 ", ""));
                                                                 else
                                                                     sbVals.Append(" ");
