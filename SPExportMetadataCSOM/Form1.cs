@@ -49,7 +49,10 @@ namespace SPExportMetadataCSOM
                     ctx.ExecuteQuery();
                     //call the function that does the inventory of the site collection    
                     List<string> processedSites = new List<string>();
-                    GetSPOSites(web, ctx, processedSites);
+                    var fileName = @"c:\test\temp" + DateTime.Now.ToFileTime().ToString() + ".csv";
+                    var swTemp = new StreamWriter(fileName, true);
+
+                    GetSPOSites(web, ctx, processedSites,swTemp);
                 }
                 catch (Exception ex) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", ex.Message + "Trace" + ex.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
             }
@@ -101,7 +104,7 @@ namespace SPExportMetadataCSOM
             return ListItems;
         }
 
-        private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites)
+        private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites, StreamWriter swTemp)
         {
             int lineIndex = 0;
             string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
@@ -213,15 +216,17 @@ namespace SPExportMetadataCSOM
                                                         sbFields.Length = sbFields.Length - 1;
                                                     if (sbVals.Length > 0)
                                                         sbVals.Length = sbVals.Length - 1;
-                                                    var lastLine = sbVals.ToString(lineIndex, sbVals.Length - lineIndex).Trim();
-                                                    //var swTemp = new StreamWriter("c:\test\temp.csv", true);
-                                                    //swTemp.WriteLine(swTemp);
-                                                    // add new lines 
-                                                    txtOutput.Text += "fields: " + lastLine + @"
-";
-                                                    txtOutput.SelectionStart = txtOutput.Text.Length;
-                                                    txtOutput.ScrollToCaret();
-
+                                                    try
+                                                    {
+                                                        var lastLine = sbVals.ToString(lineIndex, sbVals.Length - lineIndex).Trim();
+                                                        //var swTemp = new StreamWriter("c:\test\temp.csv", true);
+                                                        //swTemp.WriteLine(swTemp);
+                                                        // add new lines 
+                                                        swTemp.WriteLine(lastLine);
+                                                        swTemp.Flush();
+                                                        swTemp.Close();
+                                                    }
+                                                    catch { }
                                                     sbFields.Append(@"
 ");
                                                     lineIndex = sbVals.Length;
@@ -252,7 +257,7 @@ namespace SPExportMetadataCSOM
                             sw.Close();
                             sbFields.Clear();
                             sbVals.Clear();
-                            GetSPOSites(sWeb, Context, ProcessedSites);
+                            GetSPOSites(sWeb, Context, ProcessedSites,swTemp);
                         }
                     }
             }
