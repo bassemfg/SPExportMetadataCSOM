@@ -103,7 +103,9 @@ namespace SPExportMetadataCSOM
 
         private void GetSPOSites(Web RootWeb, ClientContext Context, List<string> ProcessedSites)
         {
-            string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
+            string connStr= @"Data Source = SP2010VM\SHAREPOINT;Initial Catalog = OriginMaterials; Connect Timeout = 30; Encrypt=True;TrustServerCertificate=True;Authentication='Active Directory Integrated';ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            
+                string RootSiteCollections = System.Configuration.ConfigurationSettings.AppSettings["RootSiteCollection"];
             //int i = 0;
             int j = 0;
             StringBuilder sbFields = new StringBuilder();
@@ -162,7 +164,7 @@ namespace SPExportMetadataCSOM
                                         if (list.BaseType == BaseType.DocumentLibrary && list.Hidden == false)
                                         {
                                             List<ListItem> AllItems = GetAllItems(Context,list,new List<ListItem>(), new CamlQuery() );
-                                            
+
                                             if (AllItems.Count > 0)
                                             {
 
@@ -178,7 +180,7 @@ namespace SPExportMetadataCSOM
 ";
                                                     txtOutput.SelectionStart = txtOutput.Text.Length;
                                                     txtOutput.ScrollToCaret();
-                                                 
+
                                                     for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
                                                     {
                                                         try
@@ -212,18 +214,43 @@ namespace SPExportMetadataCSOM
                                                         sbFields.Length = sbFields.Length - 1;
                                                     if (sbVals.Length > 0)
                                                         sbVals.Length = sbVals.Length - 1;
-                                                    // add new lines
-                                                    sbFields.Append(@"
-"); sbVals.Append(@"
-");
+                                                    
                                                     j++;
 
+                                                    using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(connStr))
+                                                    {
+                                                        conn.Open();
+                                                        string text = "";
+
+                                                        //try catch block in the sql command to continue inserting all rows if one of the rows already exists
+                                                        text =
+                @"BEGIN TRY 
+INSERT INTO EnterpriseEvents (ItemID, ItemName, EventDate, PerformedBy, EventType, EventID, ItemType, ServiceID, ServiceName) VALUES('" +
+                ((BoxFolderEventSource)entEvent.Source).Id.ToString() + "','" +
+                ((BoxFolderEventSource)entEvent.Source).Name.ToString() + "','" +
+                entEvent.CreatedAt + "','" +
+                entEvent.CreatedBy.Name + "','" +
+                entEvent.EventType + "','" +
+                entEvent.EventId + "','" +
+                ((BoxFolderEventSource)entEvent.Source).Type + "','" +
+                service_id + "','" +
+                service_name + @"')
+END TRY
+BEGIN CATCH
+END CATCH";
+
+                                                        using (System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(text, conn))
+                                                        {
+                                                            // Execute the command and log the # rows affected.
+                                                            var rows = cmd.ExecuteNonQuery();
+                                                            //log.Info($"{rows} rows were inserted");
+
+
+                                                        }
+                                                    }
                                                 }
                                             }
-                                            sbFields.Append(sbVals.ToString());
-                                            sbFields.Append(@"
-");
-                                            sbVals.Clear();
+                                           
                                         }
                                     }
                                     catch (Exception e) {
@@ -233,14 +260,7 @@ namespace SPExportMetadataCSOM
                             }
                             catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
 
-                            sw = new StreamWriter(@"c:\test\metadata_" + sWeb.Url.Substring(sWeb.Url.LastIndexOf(@"/") + 1) + DateTime.Now.ToFileTimeUtc().ToString() + @".csv");
-
-                            sw.Write(sbFields.ToString());
-                            sw.Write(sbVals.ToString());
-                            sw.Flush();
-                            sw.Close();
-                            sbFields.Clear();
-                            sbVals.Clear();
+                            
                             GetSPOSites(sWeb, Context, ProcessedSites);
                         }
                     }
