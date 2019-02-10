@@ -181,6 +181,16 @@ namespace SPExportMetadataCSOM
                                                     txtOutput.SelectionStart = txtOutput.Text.Length;
                                                     txtOutput.ScrollToCaret();
 
+                                                    //try catch block in the sql command to continue inserting all rows if one of the rows already exists
+                                                   var text =
+@"BEGIN TRY 
+INSERT INTO OriginMaterialsMetadata ([#FIELDS#]) VALUES('#VALUES#')
+END TRY
+BEGIN CATCH
+END CATCH";
+
+                                                            sbFields.Clear();
+                                                            sbVals.Clear();
                                                     for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
                                                     {
                                                         try
@@ -191,10 +201,10 @@ namespace SPExportMetadataCSOM
 
                                                             //if (field.Hidden == false && field.Sealed == false)
                                                             {
-                                                                if (j == 0)
+                                                                
                                                                 {
                                                                     sbFields.Append(fieldKey.ToString());
-                                                                    sbFields.Append(',');
+                                                                    sbFields.Append("],[");
                                                                 }
 
                                                                 if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>") && !fieldValue.Contains("</"))
@@ -203,7 +213,7 @@ namespace SPExportMetadataCSOM
                                                                 else
                                                                     sbVals.Append(" ");
 
-                                                                sbVals.Append(',');
+                                                                sbVals.Append("','");
 
                                                             }
                                                         }
@@ -211,33 +221,17 @@ namespace SPExportMetadataCSOM
                                                     }
                                                     //remove last ','
                                                     if (sbFields.Length > 0)
-                                                        sbFields.Length = sbFields.Length - 1;
+                                                        sbFields.Length = sbFields.Length - 3;
                                                     if (sbVals.Length > 0)
-                                                        sbVals.Length = sbVals.Length - 1;
-                                                    
+                                                        sbVals.Length = sbVals.Length - 3;
+
+                                                    text = text.Replace("#FIELDS#", sbFields.ToString()).Replace("#VALUES#", sbVals.ToString());
+
                                                     j++;
 
                                                     using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(connStr))
                                                     {
                                                         conn.Open();
-                                                        string text = "";
-
-                                                        //try catch block in the sql command to continue inserting all rows if one of the rows already exists
-                                                        text =
-                @"BEGIN TRY 
-INSERT INTO EnterpriseEvents (ItemID, ItemName, EventDate, PerformedBy, EventType, EventID, ItemType, ServiceID, ServiceName) VALUES('" +
-                ((BoxFolderEventSource)entEvent.Source).Id.ToString() + "','" +
-                ((BoxFolderEventSource)entEvent.Source).Name.ToString() + "','" +
-                entEvent.CreatedAt + "','" +
-                entEvent.CreatedBy.Name + "','" +
-                entEvent.EventType + "','" +
-                entEvent.EventId + "','" +
-                ((BoxFolderEventSource)entEvent.Source).Type + "','" +
-                service_id + "','" +
-                service_name + @"')
-END TRY
-BEGIN CATCH
-END CATCH";
 
                                                         using (System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(text, conn))
                                                         {
