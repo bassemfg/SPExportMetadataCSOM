@@ -218,75 +218,83 @@ namespace SPExportMetadataCSOM
 
                                                 foreach (ListItem item in AllItems)
                                                 {
-                                                    Context.Load(item);
-                                                    Context.ExecuteQuery();
+                                                    try
+                                                    {
+                                                        Context.Load(item);
+                                                        Context.ExecuteQuery();
 
-                                                    //Console.WriteLine("Processing item " + item.Id);
-                                                    Console.WriteLine("Processing file: " + j + " of " + AllItems.Count + " in current list: " + list.Title);
+                                                        //Console.WriteLine("Processing item " + item.Id);
+                                                        Console.WriteLine("Processing file: " + j + " of " + AllItems.Count + " in current list: " + list.Title);
 
-                                                    //try catch block in the sql command to continue inserting all rows if one of the rows already exists
-                                                    var text =
- @"BEGIN TRY 
+                                                        //try catch block in the sql command to continue inserting all rows if one of the rows already exists
+                                                        var text =
+     @"BEGIN TRY 
 INSERT INTO OriginMaterialsMetadata ([#FIELDS#]) VALUES('#VALUES#')
 END TRY
 BEGIN CATCH
 END CATCH";
 
-                                                    sbFields.Clear();
-                                                    sbVals.Clear();
-                                                    for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
-                                                    {
-                                                        try
+                                                        sbFields.Clear();
+                                                        sbVals.Clear();
+                                                        for (int ctrFields = 0; ctrFields < item.FieldValues.Count; ctrFields++)
                                                         {
-                                                            string fieldKey = item.FieldValues.ElementAt(ctrFields).Key;
-                                                            string fieldValue;
-                                                            try { fieldValue = item.FieldValues.ElementAt(ctrFields).Value.ToString(); } catch { fieldValue = " "; }
-
-                                                            //if (field.Hidden == false && field.Sealed == false)
+                                                            try
                                                             {
+                                                                string fieldKey = item.FieldValues.ElementAt(ctrFields).Key;
+                                                                string fieldValue;
+                                                                try { fieldValue = item.FieldValues.ElementAt(ctrFields).Value.ToString(); } catch { fieldValue = " "; }
 
+                                                                //if (field.Hidden == false && field.Sealed == false)
                                                                 {
-                                                                    sbFields.Append(fieldKey.ToString());
-                                                                    sbFields.Append("],[");
-                                                                }
 
-                                                                if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>") && !fieldValue.Contains("</"))
-                                                                    sbVals.Append(fieldValue.Replace(",", "$^*").Replace(@"
+                                                                    {
+                                                                        sbFields.Append(fieldKey.ToString());
+                                                                        sbFields.Append("],[");
+                                                                    }
+
+                                                                    if (!string.IsNullOrEmpty(fieldValue) && !fieldValue.Contains("/>") && !fieldValue.Contains("</"))
+                                                                        sbVals.Append(fieldValue.Replace(",", "$^*").Replace(@"
 ", ""));
-                                                                else
-                                                                    sbVals.Append(" ");
+                                                                    else
+                                                                        sbVals.Append(" ");
 
-                                                                sbVals.Append("','");
+                                                                    sbVals.Append("','");
+
+                                                                }
+                                                            }
+                                                            catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
+                                                        }
+                                                        //remove last ','
+                                                        if (sbFields.Length > 0)
+                                                            sbFields.Length = sbFields.Length - 3;
+                                                        if (sbVals.Length > 0)
+                                                            sbVals.Length = sbVals.Length - 3;
+
+                                                        text = text.Replace("#FIELDS#", sbFields.ToString()).Replace("#VALUES#", sbVals.ToString());
+
+                                                        j++;
+
+                                                        using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(connStr))
+                                                        {
+                                                            conn.Open();
+
+                                                            using (System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(text, conn))
+                                                            {
+                                                                // Execute the command and log the # rows affected.
+                                                                var rows = cmd.ExecuteNonQuery();
+                                                                //log.Info($"{rows} rows were inserted");
+
 
                                                             }
                                                         }
-                                                        catch (Exception e) { System.Diagnostics.EventLog.WriteEntry("SPExport Exception Create", e.Message + "Trace" + e.StackTrace, System.Diagnostics.EventLogEntryType.Error, 121, short.MaxValue); }
                                                     }
-                                                    //remove last ','
-                                                    if (sbFields.Length > 0)
-                                                        sbFields.Length = sbFields.Length - 3;
-                                                    if (sbVals.Length > 0)
-                                                        sbVals.Length = sbVals.Length - 3;
-
-                                                    text = text.Replace("#FIELDS#", sbFields.ToString()).Replace("#VALUES#", sbVals.ToString());
-
-                                                    j++;
-
-                                                    using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(connStr))
+                                                    catch (Exception e)
                                                     {
-                                                        conn.Open();
+                                                        Console.WriteLine("SPExport Exception Create", e.Message + 
+                                                            "Trace" + e.StackTrace +"--inner "+ e.InnerException);
 
-                                                        using (System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(text, conn))
-                                                        {
-                                                            // Execute the command and log the # rows affected.
-                                                            var rows = cmd.ExecuteNonQuery();
-                                                            //log.Info($"{rows} rows were inserted");
-
-
-                                                        }
-                                                    }
+                                                    }                                                    }
                                                 }
-                                            }
 
                                         }
                                     }
